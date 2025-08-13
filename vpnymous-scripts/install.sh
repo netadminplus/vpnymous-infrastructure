@@ -256,6 +256,13 @@ install_marzneshin() {
     print_status "Running Marzneshin installation with MariaDB"
     bash "$MARZNESHIN_SCRIPT" install --database mariadb
     
+    # Fix docker-compose compatibility immediately after installation
+    if [[ -f "/etc/opt/marzneshin/docker-compose.yml" ]]; then
+        print_status "Fixing docker-compose compatibility issues"
+        sed -i '/required: true/d' /etc/opt/marzneshin/docker-compose.yml
+        sed -i '/required:/d' /etc/opt/marzneshin/docker-compose.yml
+    fi
+    
     if [[ $? -eq 0 ]]; then
         print_status "Marzneshin installed successfully"
     else
