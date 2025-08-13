@@ -21,6 +21,27 @@ print_warning() {
     echo -e "${YELLOW}[WARNING]${NC} $1"
 }
 
+# Cleanup function for testing (use with caution)
+cleanup_for_testing() {
+    print_warning "CLEANING UP FOR FRESH INSTALL - THIS WILL REMOVE ALL DATA!"
+    read -p "Are you sure? (yes/no): " confirm
+    if [[ "$confirm" == "yes" ]]; then
+        docker stop $(docker ps -q) 2>/dev/null || true
+        docker rm $(docker ps -aq) 2>/dev/null || true
+        rm -rf /etc/opt/marzneshin /var/lib/marzneshin /var/lib/marznode
+        print_status "Cleanup completed"
+    else
+        print_status "Cleanup cancelled"
+        exit 0
+    fi
+}
+
+# Check if cleanup flag is provided
+if [[ "$1" == "--cleanup" ]]; then
+    cleanup_for_testing
+    exit 0
+fi
+
 # Check if running as root
 if [[ $EUID -ne 0 ]]; then
    print_error "This script must be run as root"
@@ -266,14 +287,18 @@ configure_certificates() {
         exit 1
     fi
     
-    # Update docker-compose.yml SSL paths
+    # Update docker-compose.yml SSL paths and fix compatibility
     if [[ -f "/etc/opt/marzneshin/docker-compose.yml" ]]; then
-        print_status "Updating docker-compose.yml SSL certificate paths"
+        print_status "Updating docker-compose.yml SSL certificate paths and fixing compatibility"
         
+        # Fix SSL paths
         sed -i 's|SSL_KEY_FILE: "./server.key"|SSL_KEY_FILE: "./privkey.pem"|g' /etc/opt/marzneshin/docker-compose.yml
         sed -i 's|SSL_CERT_FILE: "./server.cert"|SSL_CERT_FILE: "./fullchain.pem"|g' /etc/opt/marzneshin/docker-compose.yml
         
-        print_status "Docker-compose.yml updated"
+        # Fix docker-compose compatibility - remove 'required: true' lines
+        sed -i '/required: true/d' /etc/opt/marzneshin/docker-compose.yml
+        
+        print_status "Docker-compose.yml updated and fixed"
     else
         print_error "Docker-compose.yml not found"
         exit 1
