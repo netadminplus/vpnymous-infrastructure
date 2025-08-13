@@ -1,0 +1,235 @@
+{
+    "log": {
+        "loglevel": "warning"
+    },
+    "routing": {
+        "domainStrategy": "AsIs",
+        "rules": [
+            {
+                "type": "field",
+                "ip": [
+                    "geoip:private"
+                ],
+                "outboundTag": "block"
+            }
+        ]
+    },
+    "inbounds": [
+        {
+            "tag": "TROJAN+WS+TLS+2083",
+            "listen": "0.0.0.0",
+            "port": 2083,
+            "protocol": "trojan",
+            "settings": {
+                "clients": []
+            },
+            "streamSettings": {
+                "network": "ws",
+                "security": "tls",
+                "wsSettings": {
+                    "acceptProxyProtocol": false,
+                    "path": "/path",
+                    "host": "PLACEHOLDER_DOMAIN",
+                    "headers": {}
+                },
+                "tlsSettings": {
+                    "serverName": "PLACEHOLDER_DOMAIN",
+                    "minVersion": "1.2",
+                    "maxVersion": "1.3",
+                    "cipherSuites": "RSA_AES_128_CBC:RSA_AES_256_CBC:RSA_AES_128_GCM:RSA_AES_256_GCM:AES_128_GCM:AES_256_GCM:CHACHA20_POLY1305:ECDHE_ECDSA_AES_128_CBC:ECDHE_ECDSA_AES_256_CBC:ECDHE_RSA_AES_128_CBC:ECDHE_RSA_AES_256_CBC:ECDHE_ECDSA_AES_128_GCM:ECDHE_ECDSA_AES_256_GCM:ECDHE_RSA_AES_128_GCM:ECDHE_RSA_AES_256_GCM:ECDHE_ECDSA_CHACHA20_POLY1305:ECDHE_RSA_CHACHA20_POLY1305",
+                    "rejectUnknownSni": false,
+                    "disableSystemRoot": false,
+                    "enableSessionResumption": false,
+                    "alpn": [
+                        "h2",
+                        "http/1.1"
+                    ],
+                    "certificates": [
+                        {
+                            "certificateFile": "/var/lib/marznode/fullchain.pem",
+                            "keyFile": "/var/lib/marznode/privkey.pem",
+                            "ocspStapling": 3600,
+                            "usage": "encipherment",
+                            "buildChain": false
+                        }
+                    ],
+                    "settings": {
+                        "allowInsecure": false,
+                        "fingerprint": "chrome"
+                    }
+                }
+            },
+            "sniffing": {
+                "enabled": true,
+                "destOverride": [
+                    "http",
+                    "tls",
+                    "quic",
+                    "fakedns"
+                ],
+                "metadataOnly": false,
+                "routeOnly": false
+            }
+        },
+        {
+            "tag": "VMESS+WS+TLS+2096",
+            "listen": "0.0.0.0",
+            "port": 2087,
+            "protocol": "vmess",
+            "settings": {
+                "clients": []
+            },
+            "streamSettings": {
+                "network": "ws",
+                "security": "tls",
+                "wsSettings": {
+                    "acceptProxyProtocol": false,
+                    "path": "/path",
+                    "host": "PLACEHOLDER_DOMAIN",
+                    "headers": {}
+                },
+                "tlsSettings": {
+                    "serverName": "PLACEHOLDER_DOMAIN",
+                    "minVersion": "1.2",
+                    "maxVersion": "1.3",
+                    "cipherSuites": "RSA_AES_128_CBC:RSA_AES_256_CBC:RSA_AES_128_GCM:RSA_AES_256_GCM:AES_128_GCM:AES_256_GCM:CHACHA20_POLY1305:ECDHE_ECDSA_AES_128_CBC:ECDHE_ECDSA_AES_256_CBC:ECDHE_RSA_AES_128_CBC:ECDHE_RSA_AES_256_CBC:ECDHE_ECDSA_AES_128_GCM:ECDHE_ECDSA_AES_256_GCM:ECDHE_RSA_AES_128_GCM:ECDHE_RSA_AES_256_GCM:ECDHE_ECDSA_CHACHA20_POLY1305:ECDHE_RSA_CHACHA20_POLY1305",
+                    "rejectUnknownSni": false,
+                    "disableSystemRoot": false,
+                    "enableSessionResumption": false,
+                    "alpn": [
+                        "h2",
+                        "http/1.1"
+                    ],
+                    "certificates": [
+                        {
+                            "certificateFile": "/var/lib/marznode/fullchain.pem",
+                            "keyFile": "/var/lib/marznode/privkey.pem",
+                            "ocspStapling": 3600,
+                            "usage": "encipherment",
+                            "buildChain": false
+                        }
+                    ],
+                    "settings": {
+                        "allowInsecure": false,
+                        "fingerprint": "chrome"
+                    }
+                }
+            },
+            "sniffing": {
+                "enabled": true,
+                "destOverride": [
+                    "http",
+                    "tls",
+                    "quic",
+                    "fakedns"
+                ],
+                "metadataOnly": false,
+                "routeOnly": false
+            }
+        },
+        {
+            "tag": "vmess HTTP",
+            "listen": "0.0.0.0",
+            "port": 2086,
+            "protocol": "vmess",
+            "settings": {},
+            "streamSettings": {
+                "network": "tcp",
+                "tcpSettings": {
+                    "header": {
+                        "type": "http",
+                        "response": {
+                            "version": "1.1",
+                            "status": "200",
+                            "reason": "OK",
+                            "headers": {
+                                "Content-Type": [
+                                    "application/octet-stream",
+                                    "video/mpeg",
+                                    "application/x-msdownload",
+                                    "text/html",
+                                    "application/x-shockwave-flash"
+                                ],
+                                "Transfer-Encoding": [
+                                    "chunked"
+                                ],
+                                "Connection": [
+                                    "keep-alive"
+                                ],
+                                "Pragma": "no-cache"
+                            }
+                        }
+                    }
+                },
+                "security": "none"
+            }
+        },
+        {
+            "tag": "VLESS+WS+TLS+8443",
+            "listen": "0.0.0.0",
+            "port": 8443,
+            "protocol": "vless",
+            "settings": {
+                "clients": [],
+                "decryption": "none"
+            },
+            "streamSettings": {
+                "network": "ws",
+                "security": "tls",
+                "wsSettings": {
+                    "acceptProxyProtocol": false,
+                    "path": "/path",
+                    "host": "PLACEHOLDER_DOMAIN",
+                    "headers": {}
+                },
+                "tlsSettings": {
+                    "serverName": "PLACEHOLDER_DOMAIN",
+                    "minVersion": "1.2",
+                    "maxVersion": "1.3",
+                    "cipherSuites": "RSA_AES_128_CBC:RSA_AES_256_CBC:RSA_AES_128_GCM:RSA_AES_256_GCM:AES_128_GCM:AES_256_GCM:CHACHA20_POLY1305:ECDHE_ECDSA_AES_128_CBC:ECDHE_ECDSA_AES_256_CBC:ECDHE_RSA_AES_128_CBC:ECDHE_RSA_AES_256_CBC:ECDHE_ECDSA_AES_128_GCM:ECDHE_ECDSA_AES_256_GCM:ECDHE_RSA_AES_128_GCM:ECDHE_RSA_AES_256_GCM:ECDHE_ECDSA_CHACHA20_POLY1305:ECDHE_RSA_CHACHA20_POLY1305",
+                    "rejectUnknownSni": false,
+                    "disableSystemRoot": false,
+                    "enableSessionResumption": false,
+                    "alpn": [
+                        "h2",
+                        "http/1.1"
+                    ],
+                    "certificates": [
+                        {
+                            "certificateFile": "/var/lib/marznode/fullchain.pem",
+                            "keyFile": "/var/lib/marznode/privkey.pem",
+                            "ocspStapling": 3600,
+                            "usage": "encipherment",
+                            "buildChain": false
+                        }
+                    ],
+                    "settings": {
+                        "allowInsecure": false,
+                        "fingerprint": "chrome"
+                    }
+                }
+            },
+            "sniffing": {
+                "enabled": true,
+                "destOverride": [
+                    "http",
+                    "tls",
+                    "quic",
+                    "fakedns"
+                ],
+                "metadataOnly": false,
+                "routeOnly": false
+            }
+        }
+    ],
+    "outbounds": [
+        {
+            "protocol": "freedom",
+            "tag": "direct"
+        },
+        {
+            "protocol": "blackhole",
+            "tag": "block"
+        }
+    ]
+}
