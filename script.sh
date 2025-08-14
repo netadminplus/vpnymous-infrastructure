@@ -120,39 +120,71 @@ install_docker() {
 
 install_marzneshin_script() {
     colorized_echo blue "Installing marzneshin script"
-    curl -sSL $SCRIPT_URL | install -m 755 /dev/stdin /usr/local/bin/marzneshin
+    # Use local script instead of downloading
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    install -m 755 "$SCRIPT_DIR/script.sh" /usr/local/bin/marzneshin
     colorized_echo green "marzneshin script installed successfully"
 }
 
 install_marzneshin() {
-    # Fetch releases
-    FILES_URL_PREFIX="https://raw.githubusercontent.com/marzneshin/marzneshin/master"
-	COMPOSE_FILES_URL="https://raw.githubusercontent.com/marzneshin/marzneshin-deploy/master"
+    # Use local files instead of downloading
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
  	database=$1
   	nightly=$2
   
     mkdir -p "$DATA_DIR"
     mkdir -p "$CONFIG_DIR"
 
-    colorized_echo blue "Fetching compose file"
-    curl -sL "$COMPOSE_FILES_URL/docker-compose-$database.yml" -o "$CONFIG_DIR/docker-compose.yml"
+    colorized_echo blue "Using local MariaDB compose file"
+    
+    # Use local docker-compose file for MariaDB only
+    if [ -f "$SCRIPT_DIR/docker-compose-mariadb.yml" ]; then
+        cp "$SCRIPT_DIR/docker-compose-mariadb.yml" "$CONFIG_DIR/docker-compose.yml"
+    else
+        colorized_echo red "Local docker-compose-mariadb.yml not found in $SCRIPT_DIR"
+        exit 1
+    fi
+    
     colorized_echo green "File saved in $CONFIG_DIR/docker-compose.yml"
+    
 	if [ "$nightly" = true ]; then
 	    colorized_echo red "setting compose tag to nightly."
 	 	sed -ri "s/(dawsh\/marzneshin:)latest/\1nightly/g" $CONFIG_DIR/docker-compose.yml
 	fi
  
-    colorized_echo blue "Fetching example .env file"
-    curl -sL "$FILES_URL_PREFIX/.env.example" -o "$CONFIG_DIR/.env"
+    colorized_echo blue "Using local .env file"
+    if [ -f "$SCRIPT_DIR/.env.example" ]; then
+        cp "$SCRIPT_DIR/.env.example" "$CONFIG_DIR/.env"
+    else
+        colorized_echo red "Local .env.example not found in $SCRIPT_DIR"
+        exit 1
+    fi
     colorized_echo green "File saved in $CONFIG_DIR/.env"
 
-    colorized_echo green "Marzneshin files downloaded successfully"
+    colorized_echo green "Marzneshin files configured successfully"
 }
 
 install_marznode_xray_config() {
     mkdir -p "$NODE_DATA_DIR"
-    curl -sL "https://raw.githubusercontent.com/marzneshin/marznode/master/xray_config.json" -o "$NODE_DATA_DIR/xray_config.json"
-    colorized_echo green "Sample xray config downloaded for marznode"
+    # This will be overwritten by our custom xray config anyway
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    if [ -f "$SCRIPT_DIR/xray_config.json" ]; then
+        cp "$SCRIPT_DIR/xray_config.json" "$NODE_DATA_DIR/xray_config.json"
+    else
+        # Create a minimal config if not found
+        echo '{"log":{"loglevel":"warning"},"inbounds":[],"outbounds":[{"protocol":"freedom","tag":"direct"}]}' > "$NODE_DATA_DIR/xray_config.json"
+    fi
+    colorized_echo green "Xray config configured for marznode"
+}
+
+# Fix docker-compose compatibility
+fix_compose_compatibility() {
+    colorized_echo blue "Fixing docker-compose compatibility"
+    if [ -f "$COMPOSE_FILE" ]; then
+        sed -i '/required: true/d' "$COMPOSE_FILE"
+        sed -i '/required:/d' "$COMPOSE_FILE"
+        colorized_echo green "Docker-compose compatibility fixed"
+    fi
 }
 
 uninstall_marzneshin_script() {
@@ -198,6 +230,7 @@ uninstall_marznode_data_files() {
 
 
 up_marzneshin() {
+    fix_compose_compatibility
     $COMPOSE -f $COMPOSE_FILE -p "$APP_NAME" up -d --remove-orphans
 }
 
