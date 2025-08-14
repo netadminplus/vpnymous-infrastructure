@@ -166,15 +166,8 @@ install_marzneshin() {
 
 install_marznode_xray_config() {
     mkdir -p "$NODE_DATA_DIR"
-    # This will be overwritten by our custom xray config anyway
-    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    if [ -f "$SCRIPT_DIR/xray_config.json" ]; then
-        cp "$SCRIPT_DIR/xray_config.json" "$NODE_DATA_DIR/xray_config.json"
-    else
-        # Create a minimal config if not found
-        echo '{"log":{"loglevel":"warning"},"inbounds":[],"outbounds":[{"protocol":"freedom","tag":"direct"}]}' > "$NODE_DATA_DIR/xray_config.json"
-    fi
-    colorized_echo green "Xray config configured for marznode"
+    # Don't use external config - our custom script will overwrite it anyway
+    colorized_echo green "Marznode directory prepared - custom xray config will be applied later"
 }
 
 # Fix docker-compose compatibility

@@ -112,6 +112,7 @@ create_dns_record() {
     if [[ -n "$EXISTING_IP" ]]; then
         if [[ "$EXISTING_IP" == "$SERVER_IP" ]]; then
             print_status "DNS record already exists with correct IP: ${EXISTING_IP}"
+            DNS_RECORD_CHANGED="false"
             return 0
         else
             print_warning "DNS record exists with different IP: ${EXISTING_IP}, updating to ${SERVER_IP}"
@@ -122,6 +123,7 @@ create_dns_record() {
                 -H "Authorization: Bearer ${CF_API_TOKEN}" \
                 -H "Content-Type: application/json" \
                 --data "{\"type\":\"A\",\"name\":\"${SUBDOMAIN}\",\"content\":\"${SERVER_IP}\",\"ttl\":300}")
+            DNS_RECORD_CHANGED="true"
         fi
     else
         # Create new A record
@@ -129,6 +131,7 @@ create_dns_record() {
             -H "Authorization: Bearer ${CF_API_TOKEN}" \
             -H "Content-Type: application/json" \
             --data "{\"type\":\"A\",\"name\":\"${SUBDOMAIN}\",\"content\":\"${SERVER_IP}\",\"ttl\":300}")
+        DNS_RECORD_CHANGED="true"
     fi
     
     # Check if successful
