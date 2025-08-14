@@ -320,8 +320,8 @@ install_command() {
     install_marzneshin_script
     install_marzneshin $database $nightly
     install_marznode_xray_config
-    up_marzneshin
-    follow_marzneshin_logs
+    # Don't start services automatically - our main script will handle this
+    colorized_echo green "Marzneshin installation completed, services will be started after configuration"
 }
 
 uninstall_command() {

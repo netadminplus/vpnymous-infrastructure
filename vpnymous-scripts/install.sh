@@ -349,11 +349,13 @@ restart_services() {
     
     cd /etc/opt/marzneshin
     
-    # Try docker compose (new) or docker-compose (old)
+    # Stop any running containers first
     if command -v docker &> /dev/null; then
         if docker compose version &> /dev/null; then
+            docker compose down 2>/dev/null || true
             docker compose up -d
         elif command -v docker-compose &> /dev/null; then
+            docker-compose down 2>/dev/null || true
             docker-compose up -d
         else
             print_error "Neither 'docker compose' nor 'docker-compose' found"
